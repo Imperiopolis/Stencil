@@ -17,7 +17,7 @@ public class Context {
   public subscript(key: String) -> Any? {
     /// Retrieves a variable's value, starting at the current context and going upwards
     get {
-      for dictionary in Array(dictionaries.reverse()) {
+      for dictionary in Array(dictionaries.reversed()) {
         if let value = dictionary[key] {
           return value
         }
@@ -37,7 +37,7 @@ public class Context {
   }
 
   /// Push a new level into the Context
-  private func push(dictionary: [String: Any]? = nil) {
+  private func push(_ dictionary: [String: Any]? = nil) {
     dictionaries.append(dictionary ?? [:])
   }
 
@@ -47,7 +47,7 @@ public class Context {
   }
 
   /// Push a new level onto the context for the duration of the execution of the given closure
-  public func push<Result>(dictionary: [String: Any]? = nil, @noescape closure: (() throws -> Result)) rethrows -> Result {
+  public func push<Result>(dictionary: [String: Any]? = nil, closure: (() throws -> Result)) rethrows -> Result {
     push(dictionary)
     defer { pop() }
     return try closure()

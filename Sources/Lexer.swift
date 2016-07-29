@@ -7,18 +7,18 @@ public struct Lexer {
 
   func createToken(string:String) -> Token {
     func strip() -> String {
-      return string[string.startIndex.successor().successor()..<string.endIndex.predecessor().predecessor()].trim(" ")
+        return string[string.index(after: string.index(after: string.startIndex))..<string.index(before: string.index(before: string.endIndex))].trim(character: " ")
     }
 
     if string.hasPrefix("{{") {
-      return Token.Variable(value: strip())
+      return Token.variable(value: strip())
     } else if string.hasPrefix("{%") {
-      return Token.Block(value: strip())
+      return Token.block(value: strip())
     } else if string.hasPrefix("{#") {
-      return Token.Comment(value: strip())
+      return Token.comment(value: strip())
     }
 
-    return Token.Text(value: string)
+    return Token.text(value: string)
   }
 
   /// Returns an array of tokens from a given template string.
@@ -36,14 +36,14 @@ public struct Lexer {
     while !scanner.isEmpty {
       if let text = scanner.scan(until: ["{{", "{%", "{#"]) {
         if !text.1.isEmpty {
-          tokens.append(createToken(text.1))
+          tokens.append(createToken(string: text.1))
         }
 
         let end = map[text.0]!
         let result = scanner.scan(until: end, returnUntil: true)
-        tokens.append(createToken(result))
+        tokens.append(createToken(string: result))
       } else {
-        tokens.append(createToken(scanner.content))
+        tokens.append(createToken(string: scanner.content))
         scanner.content = ""
       }
     }
@@ -84,7 +84,7 @@ class Scanner {
         return result
       }
 
-      index = index.successor()
+      index = content.index(after: index)
     }
 
     return ""
@@ -106,7 +106,7 @@ class Scanner {
         }
       }
 
-      index = index.successor()
+      index = content.index(after: index)
     }
 
     return nil
@@ -121,27 +121,27 @@ extension String {
       if character != self[index] {
         return index
       }
-      index = index.successor()
+      index = self.index(after: index)
     }
 
     return nil
   }
 
   func findLastNot(character: Character) -> String.Index? {
-    var index = endIndex.predecessor()
+    var index = self.index(before: endIndex)
     while index != startIndex {
       if character != self[index] {
-        return index.successor()
+        return self.index(after: index)
       }
-      index = index.predecessor()
+      index = self.index(before: index)
     }
 
     return nil
   }
 
   func trim(character: Character) -> String {
-    let first = findFirstNot(character) ?? startIndex
-    let last = findLastNot(character) ?? endIndex
+    let first = findFirstNot(character: character) ?? startIndex
+    let last = findLastNot(character: character) ?? endIndex
     return self[first..<last]
   }
 }
